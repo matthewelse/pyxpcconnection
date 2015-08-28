@@ -1,5 +1,5 @@
 """
- pygattosx: BLE GATT Library for Mac OSX
+ pygattosx: BLE GATT Library for Mac OS X
 
  Copyright (c) 2015 Matthew Else
 
