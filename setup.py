@@ -13,8 +13,8 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-
-from setuptools import setup, find_packages
+from setuptools import setup, Extension
+import sys
 
 def check_system(systems, message):
     import sys
@@ -39,6 +39,21 @@ OTHER_OS_MESSAGE = """
 # check that this is being installed on Mac OS X.
 check_system(['darwin'], OTHER_OS_MESSAGE)
 
+if sys.version_info.major == 3:
+    boost_libs = ["boost_python-py34"]
+else:
+    boost_libs = ["boost_python"]
+
+modules = [
+    Extension(
+        'pygattosx',
+        ['src/XpcConnectionBase.cpp',
+         'src/bindings.cpp'],
+        extra_compile_args=['-std=c++11'],
+        libraries = boost_libs
+    )
+]
+
 setup(
     name = "pygattosx",
     version = "0.0.1",
@@ -48,5 +63,5 @@ setup(
     license = "Apache-2.0",
     keywords = "ble",
     url = "about:blank",
-    packages = find_packages()
+    ext_modules=modules,
 )

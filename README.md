@@ -6,7 +6,7 @@ A Python Bluetooth Low Energy wrapper for OSX. This is an abstraction layer, whi
 
 > Most of the time, you won't need to install this package directly - you should install [bleep](https://github.com/matthewelse/bleep) instead.
 
-The only dependencies for this module are PyObjC, which should be installed by default on OS X, and CoreBluetooth.framework, which is also installed on OS X. As a result, installation is simple:
+All of pygattosx's dependencies are included with OS X, so installation is simple:
 
 ```bash
 git clone https://github.com/matthewelse/pygattosx
