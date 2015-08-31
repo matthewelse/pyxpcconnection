@@ -1,5 +1,5 @@
 /*
-    pygattosx: BLE GATT Library for Mac OS X
+    pyxpcconnection: OS X XPC Bindings for Python
 
     Copyright (c) 2015 Matthew Else
 
@@ -15,7 +15,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 */
-
 #include <boost/python.hpp>
 #include <string>
 

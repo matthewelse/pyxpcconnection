@@ -1,5 +1,5 @@
 /*
-    pygattosx: BLE GATT Library for Mac OS X
+    pyxpcconnection: OS X XPC Bindings for Python
 
     Copyright (c) 2015 Matthew Else
 

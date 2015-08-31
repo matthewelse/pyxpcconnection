@@ -1,5 +1,5 @@
 """
- pygattosx: BLE GATT Library for Mac OS X
+ pyxpcconnection: OS X XPC Bindings for Python
 
  Copyright (c) 2015 Matthew Else
 
@@ -25,7 +25,7 @@ def check_system(systems, message):
 
 OTHER_OS_MESSAGE = """
         *****************************************************
-        *         pygattosx only works on Mac OS X          *
+        *      pyxpcconnection only works on Mac OS X       *
         *                                                   *
         *    if you're using Linux, then try pygattlib      *
         * instead: https://github.com/matthewelse/pygattlib *
@@ -46,7 +46,7 @@ else:
 
 modules = [
     Extension(
-        'pygattosx',
+        'pyxpcconnection',
         ['src/XpcConnectionBase.cpp',
          'src/bindings.cpp'],
         extra_compile_args=['-std=c++11'],
@@ -55,11 +55,11 @@ modules = [
 ]
 
 setup(
-    name = "pygattosx",
+    name = "pyxpcconnection",
     version = "0.0.1",
     author = "Matthew Else",
     author_email = "matthew.else@arm.com",
-    description = "Python GATT Library for Mac OSX",
+    description = "Python XPC Library for Mac OSX",
     license = "Apache-2.0",
     keywords = "ble",
     url = "about:blank",
