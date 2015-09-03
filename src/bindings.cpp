@@ -24,7 +24,9 @@
 
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE(pygattosx) {
+BOOST_PYTHON_MODULE(pyxpcconnection) {
+    PyEval_InitThreads();
+    
     class_<XpcConnection, boost::noncopyable>("XpcConnection", init<std::string>())
         .def("sendMessage", &XpcConnection::sendMessage)
         .def("handler", pure_virtual(&XpcConnection::handler))

@@ -46,7 +46,7 @@ XpcConnectionBase::XpcConnectionBase(std::string target) :
 
         // handle the event
         handleEvent(event);
-        //PyGILState_Release(gstate);
+        PyGILState_Release(gstate);
     });
 
     xpc_connection_resume(xpcConnection);
@@ -60,9 +60,12 @@ xpc_object_t XpcConnectionBase::ValueToXpcObject(boost::python::object obj) {
 
     std::string type = boost::python::extract<std::string>(obj.attr("__class__").attr("__name__"));
 
+    //std::cout << "unpacking: " << type << std::endl;
+
     if (type == "UUID") {
-        std::string s = boost::python::extract<std::string>(obj);
-        uuid_t *uuid = (uuid_t *)s.c_str();
+        boost::python::str s = boost::python::str(obj);
+        std::string str = boost::python::extract<std::string>(s);
+        uuid_t *uuid = (uuid_t *)str.c_str();
 
         xpcObject = xpc_uuid_create(*uuid);
     } else if (type == "str") {
@@ -78,11 +81,14 @@ xpc_object_t XpcConnectionBase::ValueToXpcObject(boost::python::object obj) {
         xpcObject = XpcConnectionBase::DictToXpcObject(dict);
     } else if (type == "list") {
         boost::python::list list = boost::python::extract<boost::python::list>(obj);
+
         xpcObject = XpcConnectionBase::ListToXpcObject(list);
     } else if (type == (PY_MAJOR_VERSION == 3 ? "memoryview" : "buffer")) {
         std::string s = boost::python::extract<std::string>(obj);
 
         xpcObject = xpc_data_create(s.c_str(), s.size());
+    } else if (obj.is_none()) {
+        /* empty */
     } else {
         std::cout << "[xpc] unexpected data type: " << type << std::endl;
     }
@@ -144,7 +150,11 @@ boost::python::object XpcConnectionBase::XpcObjectToValue(xpc_object_t xpcObject
         long value = xpc_int64_get_value(xpcObject);
         obj = boost::python::object(value);
     }
-    else if (valueType == XPC_TYPE_STRING || valueType == XPC_TYPE_DATA) {
+    else if (valueType == XPC_TYPE_STRING) {
+        std::string value(xpc_string_get_string_ptr(xpcObject));
+        obj = boost::python::object(value);
+    }
+    else if (valueType == XPC_TYPE_DATA) {
         std::string value((char *)xpc_data_get_bytes_ptr(xpcObject), xpc_data_get_length(xpcObject));
         obj = boost::python::object(value);
     }
@@ -191,34 +201,40 @@ boost::python::list XpcConnectionBase::XpcArrayToList(xpc_object_t xpcArray) {
 }
 
 void XpcConnectionBase::handleEvent(xpc_object_t event) {
-    auto gstate = PyGILState_Ensure();
-    // return a tuple containing type, and details
-    xpc_type_t eventType = xpc_get_type(event);
+    try {
+        auto gstate = PyGILState_Ensure();
+        // return a tuple containing type, and details
+        xpc_type_t eventType = xpc_get_type(event);
 
-    if (eventType == XPC_TYPE_ERROR) {
-        std::string message = "unknown";
+        if (eventType == XPC_TYPE_ERROR) {
+            std::string message = "unknown";
 
-        if (event == XPC_ERROR_CONNECTION_INTERRUPTED) {
-            message = "connection interrupted";
-        } else if (event == XPC_ERROR_CONNECTION_INVALID) {
-            message = "connection invalid";
+            if (event == XPC_ERROR_CONNECTION_INTERRUPTED) {
+                message = "connection interrupted";
+            } else if (event == XPC_ERROR_CONNECTION_INVALID) {
+                message = "connection invalid";
+            }
+
+            std::cout << "[xpc] error: " << message << std::endl;
+
+            boost::python::tuple args = boost::python::make_tuple(std::string("error"), message);
+            handler(args);
+        } else if (eventType == XPC_TYPE_DICTIONARY) {
+            //std::cout << "[xpc] received XPC event" << std::endl;
+
+            boost::python::object obj = XpcConnectionBase::XpcObjectToValue(event);
+            boost::python::tuple args = boost::python::make_tuple(std::string("event"), obj);
+
+            handler(args);
+        } else {
+            std::cout << "[xpc] received something strange..." << std::endl;
         }
 
-        std::cout << "[xpc] error: " << message << std::endl;
-
-        boost::python::tuple args = boost::python::make_tuple(std::string("error"), message);
-        handler(args);
-    } else if (eventType == XPC_TYPE_DICTIONARY) {
-        boost::python::object obj = XpcConnectionBase::XpcObjectToValue(event);
-        boost::python::tuple args = boost::python::make_tuple(std::string("event"), obj);
-
-        handler(args);
-    } else {
-        std::cout << "[xpc] received something strange..." << std::endl;
+        xpc_release(event);
+        PyGILState_Release(gstate);
+    } catch(boost::python::error_already_set const&) {
+        PyErr_Print();
     }
-
-    xpc_release(event);
-    PyGILState_Release(gstate);
 }
 
 void XpcConnectionBase::sendMessage(boost::python::dict obj) {
@@ -227,6 +243,7 @@ void XpcConnectionBase::sendMessage(boost::python::dict obj) {
     xpc_object_t message = XpcConnectionBase::DictToXpcObject(obj);
 
     xpc_connection_send_message(xpcConnection, message);
+
     xpc_release(message);
 
     PyGILState_Release(gstate);

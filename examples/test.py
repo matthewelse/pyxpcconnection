@@ -13,33 +13,101 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-from pygattosx import XpcConnection
+from pyxpcconnection import XpcConnection
 from threading import Event
+
+import time
+
+from uuid import UUID
 
 class Connection(XpcConnection):
     def __init__(self, target, event):
         super(Connection, self).__init__(target)
         self.event = event
 
+    def onEvent(self, data):
+        msg_id = data['kCBMsgId']
+        args = data['kCBMsgArgs']
+
+        if msg_id == 6:
+            # state changed
+            STATE_TYPES = ['unknown', 'resetting', 'unsupported', 'unauthorized', 'poweredOff', 'poweredOn']
+            print('State Changed: %s' % STATE_TYPES[args['kCBMsgArgState']])
+        elif msg_id == 37:
+            # discovered a device
+            args.setdefault(None)
+
+            rssi = args['kCBMsgArgRssi']
+            uuid = UUID(bytes=args['kCBMsgArgDeviceUUID'])
+            ad_data = args['kCBMsgArgAdvertisementData']
+
+            print(rssi)
+            print(uuid)
+            print(ad_data)
+
+    def onError(self, data):
+        pass
+
     def handler(self, event):
-        print(event)
+        e_type, data = event
+
+        if e_type == 'event':
+            self.onEvent(data)
+        elif e_type == 'error':
+            self.onError(data)
+        else:
+            # que?
+            pass
+
         self.event.set()
 
 e = Event()
 
 conn = Connection('com.apple.blued', e)
 
-d = {
-    'kCBMsgId': 1, 
-    'kCBMsgArgs': {
-        'kCBMsgArgAlert': 1,
-        'kCBMsgArgName': 'node'
+def init():
+    # init
+    init_data = {
+        'kCBMsgArgName': 'py-' + str(time.time()),
+        'kCBMsgArgOptions': {
+            'kCBInitOptionShowPowerAlert': 0
+        },
+        'kCBMsgArgType': 0
     }
-}
+
+    conn.sendMessage({
+        'kCBMsgId': 1,
+        'kCBMsgArgs': init_data
+    })
+
+    e.wait()
+    e.clear()
+
+def startScanning():
+    scan_data = {
+        'kCBMsgArgOptions': {},
+        'kCBMsgArgUUIDs': []
+    }
+
+    conn.sendMessage({
+        'kCBMsgId': 29,
+        'kCBMsgArgs': scan_data
+    })
+
+    e.wait()
+    e.clear()
+
+def stopScanning():
+    conn.sendMessage({
+        'kCBMsgId': 30,
+        'kCBMsgArgs': None
+    })
+
+    e.wait()
+    e.clear()
 
 
-conn.sendMessage(d)
 
-e.wait()
-
-
+init()
+startScanning()
+e.stopScanning()
