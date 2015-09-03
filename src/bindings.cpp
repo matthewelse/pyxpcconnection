@@ -24,7 +24,7 @@
 
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE(pyxpcconnection) {
+BOOST_PYTHON_MODULE(xpcconnection) {
     PyEval_InitThreads();
     
     class_<XpcConnection, boost::noncopyable>("XpcConnection", init<std::string>())
