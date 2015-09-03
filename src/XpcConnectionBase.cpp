@@ -16,7 +16,7 @@
  *   limitations under the License.
  */
 #include <iostream>
-#include <map>
+#include <vector>
 
 #include "XpcConnectionBase.h"
 
@@ -63,9 +63,15 @@ xpc_object_t XpcConnectionBase::ValueToXpcObject(boost::python::object obj) {
     //std::cout << "unpacking: " << type << std::endl;
 
     if (type == "UUID") {
-        boost::python::str s = boost::python::str(obj);
-        std::string str = boost::python::extract<std::string>(s);
-        uuid_t *uuid = (uuid_t *)str.c_str();
+        boost::python::object s = obj.attr("bytes");
+
+        std::vector<uint8_t> data;
+
+        for (int i = 0; i < str.size(); i++) {
+            data.push_back(str.data()[i] & 0xff);
+        }
+
+        uuid_t *uuid = (uuid_t *)str.data();
 
         xpcObject = xpc_uuid_create(*uuid);
     } else if (type == "str") {
