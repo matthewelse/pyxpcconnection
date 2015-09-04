@@ -39,7 +39,7 @@ private:
 
     static boost::python::object XpcObjectToValue(xpc_object_t xpcObject);
     static boost::python::dict   XpcDictToDict(xpc_object_t xpcDictionary);
-    static boost::python::list   XpcArrayToList(xpc_object_t xpcArray);
+    static boost::python::dict   XpcArrayToList(xpc_object_t xpcArray);
 
     void handleEvent(xpc_object_t event);
 

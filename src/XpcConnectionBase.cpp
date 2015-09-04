@@ -65,6 +65,8 @@ xpc_object_t XpcConnectionBase::ValueToXpcObject(boost::python::object obj) {
     if (type == "UUID") {
         boost::python::object s = obj.attr("bytes");
 
+        std::string str = boost::python::extract<std::string>(s);
+
         std::vector<uint8_t> data;
 
         for (int i = 0; i < str.size(); i++) {
@@ -194,8 +196,8 @@ boost::python::dict XpcConnectionBase::XpcDictToDict(xpc_object_t xpcDictionary)
     return d;
 }
 
-boost::python::list XpcConnectionBase::XpcArrayToList(xpc_object_t xpcArray) {
-    __block boost::python::list array;
+boost::python::dict XpcConnectionBase::XpcArrayToList(xpc_object_t xpcArray) {
+    __block boost::python::dict array;
 
     xpc_array_apply(xpcArray, ^bool(size_t index, xpc_object_t value) {
         array[index] = XpcConnectionBase::XpcObjectToValue(value);
