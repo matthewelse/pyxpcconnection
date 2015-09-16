@@ -174,7 +174,9 @@ boost::python::object XpcConnectionBase::XpcObjectToValue(xpc_object_t xpcObject
     }
     else if (valueType == XPC_TYPE_UUID) {
         std::string buffer((char *)xpc_uuid_get_bytes(xpcObject), sizeof(uuid_t));
-        obj = boost::python::object(buffer);
+        std::string new_buffer;
+        new_buffer.assign(buffer);
+        obj = boost::python::object(new_buffer);
     }
 
     PyGILState_Release(gstate);
