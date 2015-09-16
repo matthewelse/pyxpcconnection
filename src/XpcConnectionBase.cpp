@@ -98,7 +98,7 @@ xpc_object_t XpcConnectionBase::ValueToXpcObject(boost::python::object obj) {
     } else if (obj.is_none()) {
         /* empty */
     } else {
-        std::cout << "[xpc] unexpected data type: " << type << std::endl;
+        //std::cout << "[xpc] unexpected data type: " << type << std::endl;
     }
 
     PyGILState_Release(gstate);
@@ -223,23 +223,23 @@ void XpcConnectionBase::handleEvent(xpc_object_t event) {
                 message = "connection invalid";
             }
 
-            std::cout << "[xpc] error: " << message << std::endl;
+            //std::cout << "[xpc] error: " << message << std::endl;
 
             boost::python::tuple args = boost::python::make_tuple(std::string("error"), message);
-            handler(args);
+            //handler(args);
         } else if (eventType == XPC_TYPE_DICTIONARY) {
-            //std::cout << "[xpc] received XPC event" << std::endl;
-
             boost::python::object obj = XpcConnectionBase::XpcObjectToValue(event);
             boost::python::tuple args = boost::python::make_tuple(std::string("event"), obj);
 
+            //std::cout << "[xpc] received XPC event: " << obj.attr("__getitem__")("kCBMsgId") << std::endl;
+
             handler(args);
         } else {
-            std::cout << "[xpc] received something strange..." << std::endl;
+            //std::cout << "[xpc] received something strange..." << std::endl;
         }
 
-        xpc_release(event);
         PyGILState_Release(gstate);
+        xpc_release(event);
     } catch(boost::python::error_already_set const&) {
         PyErr_Print();
     }
