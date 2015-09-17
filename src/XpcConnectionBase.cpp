@@ -91,10 +91,14 @@ xpc_object_t XpcConnectionBase::ValueToXpcObject(boost::python::object obj) {
         boost::python::list list = boost::python::extract<boost::python::list>(obj);
 
         xpcObject = XpcConnectionBase::ListToXpcObject(list);
-    } else if (type == (PY_MAJOR_VERSION == 3 ? "memoryview" : "buffer")) {
-        std::string s = boost::python::extract<std::string>(obj);
+    } else if (type == "tuple") {
+        // data in the first element
+        boost::python::tuple t = boost::python::extract<boost::python::tuple>(obj);
+        boost::python::object data = t[0];
+        std::string str_data = boost::python::extract<std::string>(data);
 
-        xpcObject = xpc_data_create(s.c_str(), s.size());
+        xpcObject = xpc_data_create(str_data.c_str(), str_data.size());
+
     } else if (obj.is_none()) {
         /* empty */
     } else {
