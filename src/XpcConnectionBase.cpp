@@ -167,7 +167,7 @@ boost::python::object XpcConnectionBase::XpcObjectToValue(xpc_object_t xpcObject
 #if PY_MAJOR_VERSION >= 3
         obj = boost::python::object( boost::python::handle<>( PyBytes_FromStringAndSize(value.c_str(), value.size() ) ) );
 #else
-        obj = boost::python::object(new_buffer);
+        obj = boost::python::object(value);
 #endif
     }
     else if (valueType == XPC_TYPE_DATA) {
@@ -175,7 +175,7 @@ boost::python::object XpcConnectionBase::XpcObjectToValue(xpc_object_t xpcObject
 #if PY_MAJOR_VERSION >= 3
         obj = boost::python::object( boost::python::handle<>( PyBytes_FromStringAndSize(value.c_str(), value.size() ) ) );
 #else
-        obj = boost::python::object(new_buffer);
+        obj = boost::python::object(value);
 #endif
     }
     else if (valueType == XPC_TYPE_DICTIONARY) {
