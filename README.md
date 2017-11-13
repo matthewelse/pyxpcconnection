@@ -16,6 +16,13 @@ cd pyxpcconnection
 sudo python setup.py install
 ```
 
+If you are compiling and running using Python3 installed via HomeBrew run:
+
+```bash
+brew install boost-python --with-python3
+ln -s /usr/local/lib/libboost_python3.a /usr/local/lib/libboost_python-py34.a
+``` 
+
 If you want to work on the development of pyxpcconnection, use this instead:
 
 ```bash

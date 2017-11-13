@@ -48,7 +48,7 @@ modules = [
         'xpcconnection',
         ['src/XpcConnectionBase.cpp',
          'src/bindings.cpp'],
-        extra_compile_args=['-std=c++11'],
+        extra_compile_args=['-std=c++11', '-stdlib=libc++', '-mmacosx-version-min=10.9'],
         libraries = boost_libs
     )
 ]

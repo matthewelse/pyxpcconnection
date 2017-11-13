@@ -164,11 +164,19 @@ boost::python::object XpcConnectionBase::XpcObjectToValue(xpc_object_t xpcObject
     }
     else if (valueType == XPC_TYPE_STRING) {
         std::string value(xpc_string_get_string_ptr(xpcObject));
+#if PY_MAJOR_VERSION >= 3
+        obj = boost::python::object( boost::python::handle<>( PyBytes_FromStringAndSize(value.c_str(), value.size() ) ) );
+#else
         obj = boost::python::object(value);
+#endif
     }
     else if (valueType == XPC_TYPE_DATA) {
         std::string value((char *)xpc_data_get_bytes_ptr(xpcObject), xpc_data_get_length(xpcObject));
+#if PY_MAJOR_VERSION >= 3
+        obj = boost::python::object( boost::python::handle<>( PyBytes_FromStringAndSize(value.c_str(), value.size() ) ) );
+#else
         obj = boost::python::object(value);
+#endif
     }
     else if (valueType == XPC_TYPE_DICTIONARY) {
         obj = XpcConnectionBase::XpcDictToDict(xpcObject);
@@ -180,7 +188,11 @@ boost::python::object XpcConnectionBase::XpcObjectToValue(xpc_object_t xpcObject
         std::string buffer((char *)xpc_uuid_get_bytes(xpcObject), sizeof(uuid_t));
         std::string new_buffer;
         new_buffer.assign(buffer);
+#if PY_MAJOR_VERSION >= 3
+        obj = boost::python::object( boost::python::handle<>( PyBytes_FromStringAndSize(new_buffer.c_str(), new_buffer.size() ) ) );
+#else
         obj = boost::python::object(new_buffer);
+#endif
     }
 
     PyGILState_Release(gstate);
