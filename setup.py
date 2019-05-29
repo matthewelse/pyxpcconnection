@@ -71,13 +71,13 @@ modules = [
 ]
 
 setup(
-    name = "xpcconnection",
-    version = "0.0.1",
-    author = "Matthew Else",
-    author_email = "matthew.else@arm.com",
-    description = "Python XPC Library for Mac OSX",
-    license = "Apache-2.0",
-    keywords = "ble",
-    url = "about:blank",
+    name="pyxpcconnection",
+    version="0.0.1",
+    author="Matthew Else",
+    author_email="matthew.else@arm.com",
+    description="Python XPC Library for Mac OSX",
+    license="Apache-2.0",
+    keywords="ble",
+    url="about:blank",
     ext_modules=modules,
 )
