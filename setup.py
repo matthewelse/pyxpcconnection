@@ -14,13 +14,17 @@
 
 from setuptools import setup, Extension
 import sys
+import glob
+
 
 def check_system(systems, message):
     import sys
+
     if sys.platform in systems:
         return
     print(message)
     sys.exit(1)
+
 
 OTHER_OS_MESSAGE = """
         *****************************************************
@@ -39,7 +43,20 @@ OTHER_OS_MESSAGE = """
 check_system(['darwin'], OTHER_OS_MESSAGE)
 
 if sys.version_info.major == 3:
-    boost_libs = ["boost_python-py34"]
+    found_lib = None
+    sub_version = sys.version_info.minor
+    general_search = "*boost_python*3*.a"
+    preferred_search = "*boost_python*3*{}*".format(sub_version)
+    for search_term in [preferred_search, general_search]:
+        results = glob.glob("/usr/local/lib/{}".format(search_term))
+        if results:
+            found_lib = results[0]
+    if found_lib:
+        boost_libs = [found_lib]
+    else:
+        raise Exception(
+            "Boost library for python3 not found in /usr/local/lib. Please install boost-python3."
+        )
 else:
     boost_libs = ["boost_python"]
 
@@ -54,13 +71,13 @@ modules = [
 ]
 
 setup(
-    name = "xpcconnection",
-    version = "0.0.1",
-    author = "Matthew Else",
-    author_email = "matthew.else@arm.com",
-    description = "Python XPC Library for Mac OSX",
-    license = "Apache-2.0",
-    keywords = "ble",
-    url = "about:blank",
+    name="pyxpcconnection",
+    version="0.0.1",
+    author="Matthew Else",
+    author_email="matthew.else@arm.com",
+    description="Python XPC Library for Mac OSX",
+    license="Apache-2.0",
+    keywords="ble",
+    url="about:blank",
     ext_modules=modules,
 )
